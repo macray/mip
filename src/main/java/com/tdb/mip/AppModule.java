@@ -2,9 +2,17 @@ package com.tdb.mip;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
+import com.tdb.mip.service.filenameparser.FileNameParser;
+import com.tdb.mip.service.filenameparser.FileNameParserImpl;
+import com.tdb.mip.service.sourcefilefinder.SourceFilesFinder;
+import com.tdb.mip.service.sourcefilefinder.SourceFilesFinderImpl;
 import com.tdb.mip.config.PipelineConfig;
-import com.tdb.mip.operation.OperationsFactory;
-import com.tdb.mip.operation.OperationsFactoryImpl;
+import com.tdb.mip.operation.ClasspathScanOperationFactoriesProvider;
+import com.tdb.mip.operation.OperationFactoriesProvider;
+import com.tdb.mip.operation.OperationFactoryManager;
+import com.tdb.mip.operation.OperationFactoryManagerImpl;
+import com.tdb.mip.pipeline.PipelineFactory;
+import com.tdb.mip.pipeline.PipelineFactoryImpl;
 import org.aeonbits.owner.ConfigFactory;
 
 import java.io.FileInputStream;
@@ -28,7 +36,10 @@ public class AppModule extends AbstractModule {
         bind(PipelineConfig.class).toInstance(ConfigFactory.create(PipelineConfig.class, properties));
 
         bind(SourceFilesFinder.class).to(SourceFilesFinderImpl.class).in(Singleton.class);
-        bind(OperationsFactory.class).to(OperationsFactoryImpl.class).in(Singleton.class);
         bind(FileNameParser.class).to(FileNameParserImpl.class).in(Singleton.class);
+        bind(OperationFactoryManager.class).to(OperationFactoryManagerImpl.class).in(Singleton.class);
+        bind(OperationFactoriesProvider.class).to(ClasspathScanOperationFactoriesProvider.class).in(Singleton.class);
+        bind(PipelineFactory.class).to(PipelineFactoryImpl.class).in(Singleton.class);
+        bind(OperationFactoriesProvider.class).to(ClasspathScanOperationFactoriesProvider.class).in(Singleton.class);
     }
 }

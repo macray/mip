@@ -4,16 +4,17 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.tdb.mip.config.PipelineConfig;
 import com.tdb.mip.config.PipelineConfigChecker;
-import com.tdb.mip.operation.Operation;
-import com.tdb.mip.operation.OperationBuilder;
-import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
+import com.tdb.mip.pipeline.Pipeline;
+import com.tdb.mip.pipeline.PipelineExecutor;
+import com.tdb.mip.pipeline.PipelineFactory;
+import com.tdb.mip.service.sourcefilefinder.SourceFilesFinder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.Validate;
 
 import javax.inject.Inject;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -27,6 +28,9 @@ public class App {
 
     @Inject
     SourceFilesFinder sourceFilesFinder;
+
+    @Inject
+    PipelineFactory pipelineFactory;
 
     public static void main(String[] args) throws IOException {
         log.info("Mobile Image Pipeline starting ...");
@@ -45,15 +49,25 @@ public class App {
     }
 
     public void run() {
-        List<Class<? extends OperationBuilder>> operationFactories = new ArrayList<>();
-        new FastClasspathScanner("com.tdb.mip")
-                .matchClassesImplementing(OperationBuilder.class, operationFactories::add)
-                .scan();
-
-        System.out.println(operationFactories);
         PipelineConfigChecker.check(pipelineConfig);
 
         List<Path> sourceFiles = sourceFilesFinder.findFiles();
+        List<Pipeline> pipelines = createPipelines(sourceFiles);
+        runAndWaitForCompletion(pipelines);
+    }
 
+    private List<Pipeline> createPipelines(List<Path> sourceFiles) {
+        List<Pipeline> pipelines = new LinkedList<>();
+        for (Path file : sourceFiles) {
+            Pipeline pipeline = pipelineFactory.build(file);
+            pipelines.add(pipeline);
+        }
+        return pipelines;
+    }
+
+    private void runAndWaitForCompletion(List<Pipeline> pipelines) {
+        PipelineExecutor executor = new PipelineExecutor();
+        pipelines.forEach(executor::execute);
+        executor.awaitTermination();
     }
 }

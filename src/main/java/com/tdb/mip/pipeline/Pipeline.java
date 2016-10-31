@@ -1,36 +1,37 @@
 package com.tdb.mip.pipeline;
 
-import com.tdb.mip.Platform;
+import com.tdb.mip.service.filenamebuilder.OutputFileNameBuilder;
+import com.tdb.mip.model.Platform;
 import com.tdb.mip.density.Density;
-import com.tdb.mip.operation.Operation;
-import com.tdb.mip.writer.ImageWriter;
+import com.tdb.mip.service.pixelrounding.PixelRounding;
+import com.tdb.mip.service.writer.ImageWriter;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 
+import java.nio.file.Path;
 import java.util.List;
+
+import static com.tdb.mip.service.filenameparser.FileNameParser.*;
+import static com.tdb.mip.operation.OperationFactoryManager.*;
 
 /**
  * Created by mcy on 26/10/2016.
  */
 @Getter
 @Setter
-@Slf4j
-public class Pipeline implements Runnable {
+@NoArgsConstructor
+public class Pipeline {
+    // add working size
     private List<Density> targetDensities;
-    private List<Operation> operations;
+    private Operations operations;
     private ImageWriter imageWriter;
     private Platform platform;
-
-    @Override
-    @SneakyThrows
-    public void run() {
-        for(Density density : targetDensities){
-            for(Operation operation : operations){
-                operation.process(this);
-            }
-            imageWriter.save(null, null);
-        }
-    }
+    private Path sourceFile;
+    private FileNameInfo sourceFileInfo;
+    private PipelineRunnable pipelineRunnable;
+    private OutputFileNameBuilder outputFileNameBuilder;
+    private Path outputDir;
+    private Density sourceDensity;
+    private PixelRounding pixelRounding;
 }

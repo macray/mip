@@ -10,9 +10,9 @@ import lombok.ToString;
 @ToString
 @Getter
 public class OperationDescription {
-    private String rawDescription;
+    private String textDescription;
 
-    public OperationDescription(String rawDescription){
-        this.rawDescription = rawDescription;
+    public OperationDescription(String textDescription){
+        this.textDescription = textDescription;
     }
 }

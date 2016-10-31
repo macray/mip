@@ -3,7 +3,6 @@ package com.tdb.mip.operation.tweak;
 import com.tdb.mip.density.AndroidDensity;
 import com.tdb.mip.density.Density;
 import com.tdb.mip.density.DensityUtils;
-import com.tdb.mip.operation.Operation;
 import com.tdb.mip.pipeline.Pipeline;
 
 import java.util.*;
@@ -11,10 +10,10 @@ import java.util.*;
 /**
  * Created by mcy on 27/10/2016.
  */
-public class LauncherIconOperation implements Operation {
+public class LauncherIconOperation implements ConfigurationOperation {
 
     @Override
-    public void process(Pipeline pipeline) {
+    public void run(Pipeline pipeline) {
         switch (pipeline.getPlatform()) {
             case ANDROID:
                 android(pipeline);

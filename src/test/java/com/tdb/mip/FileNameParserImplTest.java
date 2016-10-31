@@ -1,10 +1,10 @@
 package com.tdb.mip;
 
+import com.tdb.mip.service.filenameparser.FileNameParser;
+import com.tdb.mip.service.filenameparser.FileNameParserImpl;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 /**
  * Created by mcy on 26/10/2016.
@@ -36,9 +36,9 @@ public class FileNameParserImplTest {
     public void extract_operation_descriptions() {
         FileNameParser.FileNameInfo info = fileNameParser.parse("base_name-icon-bla1-blabla2.extension");
         Assertions.assertThat(info.getOperationDescriptions()).hasSize(3);
-        Assertions.assertThat(info.getOperationDescriptions().get(0).getRawDescription()).isEqualTo("icon");
-        Assertions.assertThat(info.getOperationDescriptions().get(1).getRawDescription()).isEqualTo("bla1");
-        Assertions.assertThat(info.getOperationDescriptions().get(2).getRawDescription()).isEqualTo("blabla2");
+        Assertions.assertThat(info.getOperationDescriptions().get(0).getTextDescription()).isEqualTo("icon");
+        Assertions.assertThat(info.getOperationDescriptions().get(1).getTextDescription()).isEqualTo("bla1");
+        Assertions.assertThat(info.getOperationDescriptions().get(2).getTextDescription()).isEqualTo("blabla2");
     }
 
 }

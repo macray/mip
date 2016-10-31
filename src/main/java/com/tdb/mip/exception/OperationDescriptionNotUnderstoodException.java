@@ -7,6 +7,6 @@ public class OperationDescriptionNotUnderstoodException extends RuntimeException
     private static final long serialVersionUID = 1L;
 
     public OperationDescriptionNotUnderstoodException(OperationDescription operationDescription) {
-        super("The operation description '" + operationDescription.getRawDescription() + "' is not understood by any registered OperationBuilder");
+        super("The operation description '" + operationDescription.getTextDescription() + "' is not understood by any registered OperationFactory");
     }
 }

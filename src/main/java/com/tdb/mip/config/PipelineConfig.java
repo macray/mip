@@ -1,6 +1,6 @@
 package com.tdb.mip.config;
 
-import com.tdb.mip.Platform;
+import com.tdb.mip.model.Platform;
 import com.tdb.mip.density.Density;
 import org.aeonbits.owner.Config;
 
@@ -12,6 +12,9 @@ import java.util.regex.Pattern;
  * Created by mcy on 27/10/2016.
  */
 public interface PipelineConfig extends Config {
+
+    @Key("inkscape.path")
+    String inkscapePath();
 
     @Key("source.files.recursive")
     @DefaultValue("true")

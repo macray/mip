@@ -1,14 +1,13 @@
 package com.tdb.mip;
 
 import com.tdb.mip.config.PipelineConfig;
-import org.assertj.core.api.Assertions;
+import com.tdb.mip.service.sourcefilefinder.SourceFilesFinderImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
