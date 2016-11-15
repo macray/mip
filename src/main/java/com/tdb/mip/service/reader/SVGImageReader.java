@@ -6,9 +6,16 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.w3c.dom.*;
 
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
 import java.awt.image.BufferedImage;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -35,10 +42,10 @@ public class SVGImageReader implements ImageReader {
     @Override
     @SneakyThrows
     public BufferedImage read(Path path) {
-        Path tempFile = Files.createTempFile("inkscape", "tmp");
+        Path tempFile = Files.createTempFile("inkscape", ".png");
         List<String> commands = new LinkedList<>();
 
-        commands.add(config.inkscapePath());
+        commands.add(config.inkscapePath().toAbsolutePath().normalize().toString());
         commands.add("--without-gui");
         commands.add("--export-area-page");
         commands.add("--export-png=" + tempFile.toAbsolutePath().normalize());
@@ -50,15 +57,15 @@ public class SVGImageReader implements ImageReader {
 
         ProcessBuilder pb = new ProcessBuilder(commands);
 
-        Process p = pb.start();
-        p.waitFor(20, TimeUnit.SECONDS);
+        Process processInkscape = pb.start();
+        processInkscape.waitFor(20, TimeUnit.SECONDS);
 
-        String output = IOUtils.toString(pb.start().getInputStream(), StandardCharsets.UTF_8);
+        String output = IOUtils.toString(processInkscape.getInputStream(), StandardCharsets.UTF_8);
         if (StringUtils.isNoneBlank(output)) {
-            log.info("Inkscape output: " + output);
+            log.debug("Inkscape output: " + output);
         }
 
-        String error = IOUtils.toString(pb.start().getErrorStream(), StandardCharsets.UTF_8);
+        String error = IOUtils.toString(processInkscape.getErrorStream(), StandardCharsets.UTF_8);
         if (StringUtils.isNoneBlank(error)) {
             log.error("Inkscape error: " + error);
         }
@@ -84,32 +91,73 @@ public class SVGImageReader implements ImageReader {
     @SneakyThrows
     public Size readSize(Path path) {
         Size size = new Size();
-        List<String> commands = new LinkedList<>();
-        commands.add(config.inkscapePath());
-        commands.add("--without-gui");
-        commands.add("--query-all");
-        commands.add(path.toAbsolutePath().normalize().toString());
 
-        ProcessBuilder pb = new ProcessBuilder(commands);
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document document = builder.parse(path.toFile());
 
-        Process p = pb.start();
-        p.waitFor(20, TimeUnit.SECONDS);
-
-        String output = IOUtils.toString(pb.start().getInputStream(), StandardCharsets.UTF_8);
-        String firstLine = StringUtils.substringBefore(output, System.lineSeparator());
-        String[] split = StringUtils.split(firstLine, ',');
-        size.setWidth(Float.parseFloat(split[3]));
-        size.setHeight(Float.parseFloat(split[4]));
-
-        if (StringUtils.isNoneBlank(output)) {
-            log.debug("Inkscape output: " + output);
+        NodeList childNodes = document.getChildNodes();
+        int nbChild = childNodes.getLength();
+        NamedNodeMap svgAttributes = null;
+        for (int i = 0; i < nbChild; i++) {
+            Node item = childNodes.item(i);
+            if (item.getNodeType() == Node.ELEMENT_NODE && ((Element) item).getTagName().equalsIgnoreCase("svg")) {
+                svgAttributes = item.getAttributes();
+                break;
+            }
         }
 
-        String error = IOUtils.toString(pb.start().getErrorStream(), StandardCharsets.UTF_8);
-        if (StringUtils.isNoneBlank(error)) {
-            log.error("Inkscape error: " + error);
+        if (svgAttributes == null) {
+            throw new RuntimeException("No 'svg' element found into " + path.toAbsolutePath().normalize().toString());
+        }
+
+        Node height = svgAttributes.getNamedItem("height");
+        Node width = svgAttributes.getNamedItem("width");
+        if(height != null && width != null){
+            size.setHeight(convertDimension(height.getTextContent()));
+            size.setWidth(convertDimension(width.getTextContent()));
+        }else{
+            String viewBox = svgAttributes.getNamedItem("viewBox").getTextContent();
+            String[] split = StringUtils.split(viewBox, " ");
+            size.setHeight(convertDimension(split[3]));
+            size.setWidth(convertDimension(split[2]));
         }
 
         return size;
     }
+
+    public float convertDimension(String dim) {
+        // "1pt" equals "1.25px" (and therefore 1.25 user units)
+        // "1pc" equals "15px" (and therefore 15 user units)
+        // "1mm" would be "3.543307px" (3.543307 user units)
+        // "1cm" equals "35.43307px" (and therefore 35.43307 user units)
+        // "1in" equals "90px" (and therefore 90 user units)
+
+        if (dim.endsWith("px")) {
+            return Float.parseFloat(dim.replace("px", ""));
+        }
+
+        if (dim.endsWith("pt")) {
+            return Float.parseFloat(dim.replace("pt", "")) * 1.25f;
+        }
+
+        if (dim.endsWith("pc")) {
+            return Float.parseFloat(dim.replace("pc", "")) * 15f;
+        }
+
+        if (dim.endsWith("mm")) {
+            return Float.parseFloat(dim.replace("mm", "")) * 3.543307f;
+        }
+
+        if (dim.endsWith("cm")) {
+            return Float.parseFloat(dim.replace("cm", "")) * 35.43307f;
+        }
+
+        if (dim.endsWith("in")) {
+            return Float.parseFloat(dim.replace("in", "")) * 90f;
+        }
+
+        return Float.parseFloat(dim);
+    }
+
 }

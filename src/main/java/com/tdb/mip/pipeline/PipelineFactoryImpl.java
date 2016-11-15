@@ -9,9 +9,11 @@ import com.tdb.mip.config.PipelineConfig;
 import com.tdb.mip.operation.OperationFactoryManager;
 import com.tdb.mip.service.pixelrounding.PixelRoundingHalfDown;
 import com.tdb.mip.service.writer.PNGImageWriter;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
 import java.nio.file.Path;
+import java.util.Collections;
 
 import static com.tdb.mip.operation.OperationFactoryManager.*;
 
@@ -76,6 +78,17 @@ public class PipelineFactoryImpl implements PipelineFactory {
         }
 
         Operations operations = operationFactoryManager.build(info.getOperationDescriptions());
+
+        // handle "pre.transformations"
+        Operations pre = operationFactoryManager.build(config.preTransformations());
+        operations.getConfigurations().addAll(0, pre.getConfigurations());
+        operations.getTransformations().addAll(0, pre.getTransformations());
+
+        // handle "post.transformations"
+        Operations post = operationFactoryManager.build(config.postTransformations());
+        operations.getConfigurations().addAll(post.getConfigurations());
+        operations.getTransformations().addAll(post.getTransformations());
+
         pipeline.setOperations(operations);
 
         return pipeline;

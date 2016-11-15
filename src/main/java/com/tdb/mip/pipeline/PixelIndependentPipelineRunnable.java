@@ -55,14 +55,14 @@ public class PixelIndependentPipelineRunnable implements PipelineRunnable {
             ImageReader.Size size = imageReader.readSize(pipeline.getSourceFile());
 
             Resize resize = removeResizeTransformationFromPipeline(pipeline);
-            float ratio = DensityUtils.getRatio(pipeline.getSourceDensity(), density);
+            float densityRatio = DensityUtils.getRatio(pipeline.getSourceDensity(), density);
             if (resize != null) {
-                resize.updateTargetWidthOrHeightIfNeeded(resize.getW(), resize.getH());
-                finalSizeHeight = pipeline.getPixelRounding().round((float) resize.getH() * size.getHeight() * ratio);
-                finalSizeWidth = pipeline.getPixelRounding().round((float) resize.getW() * size.getWidth() * ratio);
+                resize.updateTargetWidthOrHeightIfNeeded(size.getWidth(), size.getHeight());
+                finalSizeHeight = pipeline.getPixelRounding().round((float) resize.getH() * densityRatio);
+                finalSizeWidth = pipeline.getPixelRounding().round((float) resize.getW() * densityRatio);
             } else {
-                finalSizeHeight = pipeline.getPixelRounding().round(size.getHeight() * ratio);
-                finalSizeWidth = pipeline.getPixelRounding().round(size.getWidth() * ratio);
+                finalSizeHeight = pipeline.getPixelRounding().round(size.getHeight() * densityRatio);
+                finalSizeWidth = pipeline.getPixelRounding().round(size.getWidth() * densityRatio);
             }
 
             // load image in final size

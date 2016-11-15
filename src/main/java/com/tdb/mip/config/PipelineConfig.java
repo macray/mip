@@ -2,6 +2,7 @@ package com.tdb.mip.config;
 
 import com.tdb.mip.model.Platform;
 import com.tdb.mip.density.Density;
+import com.tdb.mip.operation.OperationDescription;
 import org.aeonbits.owner.Config;
 
 import java.nio.file.Path;
@@ -13,8 +14,19 @@ import java.util.regex.Pattern;
  */
 public interface PipelineConfig extends Config {
 
+    @Key("global.pre.transformations")
+    @DefaultValue("")
+    @ConverterClass(OperationDescriptionConverter.class)
+    List<OperationDescription> preTransformations();
+
+    @Key("global.post.transformations")
+    @DefaultValue("")
+    @ConverterClass(OperationDescriptionConverter.class)
+    List<OperationDescription> postTransformations();
+
     @Key("inkscape.path")
-    String inkscapePath();
+    @ConverterClass(PathConverter.class)
+    Path inkscapePath();
 
     @Key("source.files.recursive")
     @DefaultValue("true")

@@ -17,26 +17,30 @@ public class Resize implements Transformation {
     private int w;
     private int h;
     private PixelRounding pixelRounding;
-    
+
     public Resize(int w, int h, PixelRounding pixelRounding) {
         this.w = w;
         this.h = h;
         this.pixelRounding = pixelRounding;
     }
 
-    // Visible for testing purpose
     public void updateTargetWidthOrHeightIfNeeded(int imgW, int imgH) {
+        updateTargetWidthOrHeightIfNeeded((float) imgW, (float) imgH);
+    }
+
+    // Visible for testing purpose
+    public void updateTargetWidthOrHeightIfNeeded(float imgW, float imgH) {
         if (w == -1 && h == -1) {
             throw new RuntimeException("need at least one constraint for resizing");
         }
 
         if (w == -1) {
-            float ratio = (float) imgH / (float) h;
+            float ratio = imgH / (float) h;
             w = pixelRounding.round(imgW / ratio);
         }
 
         if (h == -1) {
-            float ratio = (float) imgW / (float) w;
+            float ratio = imgW / (float) w;
             h = pixelRounding.round(imgH / ratio);
         }
     }
@@ -51,9 +55,9 @@ public class Resize implements Transformation {
         }
 
         LOGGER.debug("resize to w=" + w + " h=" + h);
-        
+
         return Scalr.resize(image, Method.ULTRA_QUALITY, Mode.FIT_EXACT, w,
-				h);
+                h);
     }
 
     public int getW() {

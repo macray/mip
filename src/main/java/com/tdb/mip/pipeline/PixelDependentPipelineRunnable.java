@@ -1,5 +1,7 @@
 package com.tdb.mip.pipeline;
 
+import com.tdb.mip.density.DensityUtils;
+import com.tdb.mip.operation.transformation.Resize;
 import com.tdb.mip.service.reader.PixelDependentImageReader;
 import com.tdb.mip.density.Density;
 import com.tdb.mip.operation.tweak.ConfigurationOperation;
@@ -43,9 +45,14 @@ public class PixelDependentPipelineRunnable implements PipelineRunnable {
         // generate image in target densities
         for (Density density : pipeline.getTargetDensities()) {
             // resize to target density
-            // TODO: resize
+            float ratio = DensityUtils.getRatio(pipeline.getSourceDensity(), density);
+            int w = (int)((float)bufferedImage.getWidth() * ratio);
+            int h = (int)((float)bufferedImage.getHeight() * ratio);
+            Resize resize = new Resize(w,h, pipeline.getPixelRounding());
+            BufferedImage finalImage = resize.applyTo(bufferedImage);
+
             Path outputFileName = pipeline.getOutputFileNameBuilder().buildOutputFileName(pipeline.getOutputDir(), density, pipeline.getSourceFileInfo());
-            pipeline.getImageWriter().save(bufferedImage, outputFileName);
+            pipeline.getImageWriter().save(finalImage, outputFileName);
         }
     }
 }
