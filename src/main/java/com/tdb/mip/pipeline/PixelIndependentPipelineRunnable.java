@@ -15,7 +15,9 @@ import org.apache.commons.lang3.Validate;
 import javax.inject.Inject;
 import java.awt.image.BufferedImage;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Created by mcy on 28/10/2016.
@@ -43,6 +45,9 @@ public class PixelIndependentPipelineRunnable implements PipelineRunnable {
 
         // because can change targetDensities
         for (Density density : pipeline.getTargetDensities()) {
+            // transformation list will be alterated
+            List<Transformation> clonedTransformations = clone(pipeline.getOperations().getTransformations());
+
             // compute working size
             int workingHeight = 0;
             int workingWidth = 0;
@@ -75,7 +80,13 @@ public class PixelIndependentPipelineRunnable implements PipelineRunnable {
             // generate image in target density
             Path output = pipeline.getOutputFileNameBuilder().buildOutputFileName(pipeline.getOutputDir(), density, pipeline.getSourceFileInfo());
             pipeline.getImageWriter().save(bufferedImage, output);
+
+            pipeline.getOperations().setTransformations(clonedTransformations);
         }
+    }
+
+    private List<Transformation> clone(List<Transformation> transformations) {
+        return new ArrayList<>(transformations);
     }
 
     private BufferedImage applyTransformations(Pipeline pipeline, BufferedImage image) {
