@@ -45,7 +45,7 @@ public class PixelIndependentPipelineRunnable implements PipelineRunnable {
 
         // because can change targetDensities
         for (Density density : pipeline.getTargetDensities()) {
-            // transformation list will be alterated
+            // transformation list will be modified
             List<Transformation> clonedTransformations = clone(pipeline.getOperations().getTransformations());
 
             // compute working size
