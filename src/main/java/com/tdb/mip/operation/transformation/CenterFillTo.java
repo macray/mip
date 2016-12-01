@@ -62,32 +62,13 @@ public class CenterFillTo implements Transformation {
         // resize image as icon
         BufferedImage icon = Scalr.resize(image, Scalr.Method.ULTRA_QUALITY, Scalr.Mode.FIT_EXACT, iconW, iconH);
 
-        // copy image
         Graphics2D g2 = targetImage.createGraphics();
+        // set background color
+        g2.setColor(color);
+        g2.fillRect(0, 0, targetW, targetH);
+        // copy image
         g2.drawImage(icon, null, xShift, yShift);
         g2.dispose();
-
-        // fill top and bottom
-        for (int x = 0; x < targetImage.getWidth(); x++) {
-            for (int y = yShift; y >= 0; y--) {
-                targetImage.setRGB(x, y, color.getRGB());
-            }
-
-            for (int y = yShift + image.getHeight(); y < targetImage.getHeight(); y++) {
-                targetImage.setRGB(x, y, color.getRGB());
-            }
-        }
-
-        // fill right and left
-        for (int y = 0; y < targetImage.getHeight(); y++) {
-            for (int x = xShift; x >= 0; x--) {
-                targetImage.setRGB(x, y, color.getRGB());
-            }
-
-            for (int x = xShift + image.getWidth(); x < targetImage.getWidth(); x++) {
-                targetImage.setRGB(x, y, color.getRGB());
-            }
-        }
 
         return targetImage;
     }
