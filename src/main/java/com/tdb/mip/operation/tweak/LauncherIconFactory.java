@@ -8,7 +8,7 @@ import com.tdb.mip.operation.OperationDescription;
 public class LauncherIconFactory implements ConfigurationOperationFactory<LauncherIconOperation> {
     @Override
     public boolean match(OperationDescription description) {
-        return description.equals("launcher_icon");
+        return description.getTextDescription().equals("launcher_icon");
     }
 
     @Override

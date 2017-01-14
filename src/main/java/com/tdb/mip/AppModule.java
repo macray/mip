@@ -40,6 +40,5 @@ public class AppModule extends AbstractModule {
         bind(OperationFactoryManager.class).to(OperationFactoryManagerImpl.class).in(Singleton.class);
         bind(OperationFactoriesProvider.class).to(ClasspathScanOperationFactoriesProvider.class).in(Singleton.class);
         bind(PipelineFactory.class).to(PipelineFactoryImpl.class).in(Singleton.class);
-        bind(OperationFactoriesProvider.class).to(ClasspathScanOperationFactoriesProvider.class).in(Singleton.class);
     }
 }
